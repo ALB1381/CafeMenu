@@ -1,0 +1,82 @@
+﻿@page "/"
+@using CafeMenu.Design.Assembly.Core.DTOs
+@using CafeMenu.Design.Assembly.Core.Services.Interfaces
+@inject IItemServices _service;
+<PageTitle>+You|Cafe</PageTitle>
+
+<main class="container">
+    <div class="row">
+        <div class="col-6 row justify-content-end">
+            <img class="img-fluid h-100" src="/src/Img/IMG_20241018_190941_527.jpg">
+        </div>
+        <div class="col-6 text-center row align-items-center">
+            <div>
+                <p class="text-center fs-2 amiri-bold" style="color:#adb5bd">
+                    کافه پلاس یو
+                    جایی که هر لحظه طعم خاص خودش رو داره
+                    منتظر حضور گرمتان هستیم تا با بهترین کیفیت لحظات دلنشینی رو براتون بسازیم
+
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="centered-hr text-white"><h3>Menu</h3></div>
+    <br>
+    <div class="row text-center" dir="rtl">
+        @foreach (var item3 in ItemGroupDTOs)
+        {
+            <div class="col">
+                <a href="#" style="text-decoration: none !important;" class="text-center fw-bold  text-white amiri-bold">
+                    @item3.GroupName
+                </a>
+            </div>
+        }
+        
+    </div>
+    <div class="row justify-content-center pt-3" dir="rtl">
+        @foreach (var item in ItemBoxes)
+        {
+            <div class="card mb-3 col-3 bg-black" style="width: 18rem;">
+                <img src="@item.ItemImage" class="img-fluid h-100 rounded-circle">
+                <div class="card-body text-white">
+                    <h5 class="card-title text-center">@item.Title</h5>
+                    <p class="card-text text-center">@item.ItemIngredient</p>
+                </div>
+                <table class="table text-center" style="background-color:black!important">
+                    <thead class="text-white">
+                        <tr>
+                            <th class="text-white">نام</th>
+                            <th class="text-white">قیمت</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item1 in item.Differences)
+                        {
+                            <tr>
+                                <td class="text-white">@item1.DifferenceTitle</td>
+                                <td class="text-white">@item1.DifferencePrice</td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+            <div class="col-1">
+            </div>
+        }
+    </div>
+</main>
+@code{
+    public List<ItemBoxDTO>? ItemBoxes { get; set; }
+    public List<ItemGroupDTO>? ItemGroupDTOs { get; set; }
+}
+@functions{
+    protected override async Task OnInitializedAsync()
+    {
+        ItemBoxes = new List<ItemBoxDTO>();
+        ItemGroupDTOs = new List<ItemGroupDTO>();
+        ItemBoxes = await _service.GetItemBoxInformation();
+        ItemGroupDTOs = await _service.GetAllGroups();
+
+    }
+}

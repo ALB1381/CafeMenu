@@ -1,0 +1,139 @@
+﻿@page "/ManageItems"
+@using CafeMenu.AdminPanel.Core.DTOs
+@using CafeMenu.AdminPanel.Core.Services.Interfaces
+@using CafeMenu.Data.Entities.Item
+@using Microsoft.AspNetCore.Mvc.Rendering
+@inject IItemService _service;
+@inject IItemGroupService _GroupService;
+@inject IToolService _toservice;
+<PageTitle>Manage Items</PageTitle>
+<h2>The Menu Item's list</h2>
+<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">Create New Item</button>
+<table class="table table-bordered">
+    <tr>
+        <th>Item's Image</th>
+        <th>Item's name</th>
+        <th>Item's Ingredient</th>
+        <th>Tools</th>
+    </tr>
+    @foreach (var item in Items)
+    {
+        <tr>
+            <td><img class="img-fluid" style="max-width:150px;max-height:150px" src="@item.ItemImage" /></td>
+            <td>@item.ItemName</td>
+            <td>@item.ItemIngredient</td>
+            <td>
+                <button class="btn btn-danger">Delete</button>
+                <button class="btn btn-warning">Edite</button>
+            </td>
+        </tr>
+    }
+</table>
+<!-- Full screen modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-sm-down">
+        <EditForm Model="@CreateItemDTO" OnValidSubmit="@CreateItem" FormName="CreateItemForm">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            @* <ValidationSummary></ValidationSummary> *@
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create new item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="exampleFormControlInput1" class="form-label">Item Name</label>
+                        <InputText class="form-control" @bind-Value=CreateItemDTO.ItemName placeholder="Sperreso" ></InputText>
+                        <ValidationMessage For="@(()=>CreateItemDTO.ItemName)"></ValidationMessage>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleFormControlInput1" class="form-label">Item Ingredient</label>
+                        <InputText class="form-control" @bind-Value=CreateItemDTO.ItemIngredient></InputText>
+                        <ValidationMessage For="@(()=>CreateItemDTO.ItemIngredient)"></ValidationMessage>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleFormControlInput1" class="form-label">Item Image</label>
+                        <InputFile class="form-control" @bind="@CreateItemDTO.ItemImage"></InputFile>
+                        <ValidationMessage For="@(()=>CreateItemDTO.ItemImage)"></ValidationMessage>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleFormControlInput1" class="form-label">Menu Type</label>
+                        <InputSelect class="form-select" @bind-Value=CreateItemDTO.MenuTypeID>
+                            <option selected>Select the type of menu</option>
+                            @foreach (var item in MenuTypes)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(()=>CreateItemDTO.MenuTypeID)"></ValidationMessage>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleFormControlInput1" class="form-label">Menu Group</label>
+                        <InputSelect class="form-select" @bind-Value=CreateItemDTO.ItemGroupId>
+                            <option selected>Select Group</option>
+                            @foreach (var item in ItemGroups)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(()=>CreateItemDTO.ItemGroupId)"></ValidationMessage>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleFormControlInput1" class="form-label">Extera on this item</label>
+                        @foreach (var item in ExteraOnItems)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" name="CreateItemDTO.ExteraOnItems" id="CreateItemDTO.ExteraOnItems" type="checkbox" value="@(Convert.ToInt32(item.Value))">
+                                <label class="form-check-label">
+                                    @item.Text
+                                </label>
+                            </div>
+                        }
+                        <ValidationMessage For="@(()=>CreateItemDTO.ExteraOnItems)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create this item</button>
+                </div>
+            </div>
+        </EditForm>
+
+    </div>
+</div>
+
+@code {
+    public List<Item> Items { get; set; }
+    public List<SelectListItem>? MenuTypes { get; set; }
+    public List<SelectListItem>? ItemGroups { get; set; }
+    public List<SelectListItem>? ExteraOnItems { get; set; }
+    public CreateItemDTO? CreateItemDTO { get; set; }
+    public int SOm { get; set; }
+}
+
+@functions
+{
+    protected override void OnInitialized()
+    {
+        Items = new List<Item>();
+        Items = _service.GetallItems();
+        SOm = new int();
+        SOm = _toservice.FindNextId("ss");
+        base.OnInitialized();
+    }
+    protected async override Task OnInitializedAsync()
+    {
+        ItemGroups = new List<SelectListItem>();
+        MenuTypes = new List<SelectListItem>();
+        ExteraOnItems = new List<SelectListItem>();
+        CreateItemDTO = new CreateItemDTO();
+        ItemGroups = await _GroupService.GetAllItemGroupsToSelect();
+        MenuTypes = await _GroupService.GetAllMenuTypesToSelect();
+        ExteraOnItems = await _GroupService.GetAllExteraOnItemsToSelect();
+    }
+
+   private void CreateItem()
+   {
+
+   }
+}

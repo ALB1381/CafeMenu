@@ -1,0 +1,24 @@
+﻿@page "/"
+@using CafeMenu.Core.DTOs
+@inject HttpClient Http
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+@foreach(var item in Boxes)
+{
+   <h3>
+       @item.Title
+   </h3>
+}
+
+@code{
+    public List<ItemBoxDTO> Boxes { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        Boxes = await Http.GetFromJsonAsync<List<ItemBoxDTO>>("https://localhost:7103/api/Item");
+    }
+}
